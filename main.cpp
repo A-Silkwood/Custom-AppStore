@@ -13,12 +13,11 @@ int hash(const std::string& key, int k) {
 }
 
 // initializes values for an AppInfo and also sets a given string to this app's category
-void initAppInfo(AppInfo *app, std::string *category) {
+void initAppInfo(AppInfo *app) {
     std::string input;
     // get category
     getline(std::cin, input);
-    *category = std::string(input);
-    app->category = std::string(*category);
+    app->category = std::string(input);
     // get other info
     // app name
     getline(std::cin, input);
@@ -35,6 +34,64 @@ void initAppInfo(AppInfo *app, std::string *category) {
     // app price
     getline(std::cin, input);
     app->price = stof(input);
+}
+
+void popApps(Category *categories ,HashTableEntry **table, int appCount, int m) {
+    // read each app and add to the categories and hash table
+    for(int i = 0; i < appCount; i++) {
+        // create app's node for search tree
+        Tree *appTree = new Tree;
+        initAppInfo(&appTree->record);  // read in next app info
+
+        // find the proper category to store node
+        int s = 0;
+        while(strcmp(appTree->record.category, categories[s].name) != 0) {s++;}
+        // navigate category's tree and add node
+        if(categories[s].root == NULL) {
+            // make node root of tree
+            categories[s].root = appTree;
+        } else {
+            // navigate tree
+            Tree *curr = categories[s].root;
+            while(true) { // breaks when node is added
+                if(strcmp(curr->record.name, appTree->record.name) == 1) {
+                    // app name was greater; right tree
+                    if(curr->right == NULL) {
+                        // add node
+                        curr->right = appTree;
+                        break;
+                    } else {
+                        // check right tree
+                        curr = curr->right;
+                    }
+                } else {
+                    // app name was lesser or equal; left tree
+                    if(curr->left == NULL) {
+                        // add node
+                        curr->left = appTree;
+                        break;
+                    } else {
+                        // check left tree
+                        curr = curr->left;
+                    }
+                }
+            }
+        }
+
+        // create hash entry for node
+        HashTableEntry *appHash = new HashTableEntry;
+        appHash->appName = appTree->record.name;
+        appHash->appNode = appTree;
+
+        // add hash entry to array
+        int hashIx = hash(appHash->appName, m);
+        // check for collision
+        if(table[hashIx] != NULL) {
+            appHash->next = table[hashIx];
+        }
+        // add new head to chain
+        table[hashIx] = appHash;
+    }
 }
 
 int main() {
@@ -59,55 +116,10 @@ int main() {
     std::cout << "Prime: " << hashSize << std::endl;
 
     // create hash table
-    HashTableEntry *hashTable;
-    hashTable = new HashTableEntry[hashSize];
+    HashTableEntry *hashTable[hashSize];
 
-    // populate apps
-    for(int i = 0; i < appCount; i++) {
-        // create app's node for search tree
-        Tree *app = new Tree;
-        std::string category;
-        // add info to the record for the node
-        initAppInfo(&app->record, &category);
-
-        // find the proper category to store node
-        int s = 0;
-        while(strcmp(category, categories[s].name) != 0) {s++;}
-        // navigate category's tree and add node
-        if(categories[s].root == NULL) {
-            // make node root of tree
-            categories[s].root = app;
-        } else {
-            // navigate tree
-            Tree *curr = categories[s].root;
-            while(true) { // breaks when node is added
-                if(strcmp(curr->record.name, app->record.name) == 1) {
-                    // app name was greater; right tree
-                    if(curr->right == NULL) {
-                        // add node
-                        curr->right = app;
-                        break;
-                    } else {
-                        // check right tree
-                        curr = curr->right;
-                    }
-                } else {
-                    // app name was lesser or equal; left tree
-                    if(curr->left == NULL) {
-                        // add node
-                        curr->left = app;
-                        break;
-                    } else {
-                        // check left tree
-                        curr = curr->left;
-                    }
-                }
-            }
-        }
-
-        // add app info to hash table
-
-    }
+    // populate app store
+    popApps(categories, hashTable, appCount, hashSize);
 
     return 0;
 }
