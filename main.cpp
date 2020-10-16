@@ -113,12 +113,12 @@ void showTree(Tree curr, int l, int r) {
 
 // displays all app info in proper format
 void displayApp(AppInfo app) {
-    std::cout << "Category:\t" << app.category << std::endl;
-    std::cout << "Application Name:\t" << app.name << std::endl;
-    std::cout << "Version:\t" << app.version << std::endl;
-    std::cout << "Size:\t" << app.size << std::endl;
-    std::cout << "Units:\t" << app.units << std::endl;
-    std::cout << "Price:\t$" << app.price << std::endl;
+    std::cout << "\tCategory: " << app.category << std::endl;
+    std::cout << "\tApplication Name: " << app.name << std::endl;
+    std::cout << "\tVersion: " << app.version << std::endl;
+    std::cout << "\tSize: " << app.size << std::endl;
+    std::cout << "\tUnits: " << app.units << std::endl;
+    std::cout << "\tPrice: $" << app.price;
 }
 
 //queries
@@ -136,7 +136,7 @@ void findApp(HashTableEntry **table, std::string name, int k) {
         entry = entry->next;
     }
     // app not found
-    std::cout << "Application " << name << "not found." << std::endl;
+    std::cout << "Application " << name << "not found.";
 }
 
 int main() {
@@ -173,7 +173,9 @@ int main() {
     getline(std::cin, input);
     int queries = stoi(input);
     for(int i = 0; i < queries; i++) {
+        // read in query
         getline(std::cin, input);
+        // execute query; only find app <app name> is implemented
         if (input.substr(0, 4) == "find") {
             if (input.substr(5, 3) == "app") {
                 findApp(hashTable, input.substr(9, std::string::npos), hashSize);
@@ -187,7 +189,11 @@ int main() {
         } else if (input.substr(0, 6) == "delete") {
 
         }
-        std::cout << std::endl;
+        if(i + 1 != queries) {
+            std::cout << std::endl << std::endl;
+        }
+
+        // report is unimplemented
     }
 
     return 0;
