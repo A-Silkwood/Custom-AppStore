@@ -10,7 +10,7 @@ int pow(int base, int exp) {
 }
 
 // string to integer; assumes string is only integer chars
-int stoi(const std::string& str) {
+int stoi(std::string str) {
     int num = 0;
     for(int i = 0; i < str.length(); i++) {
         num *= 10;
@@ -21,7 +21,7 @@ int stoi(const std::string& str) {
 }
 
 // string to integer; assumes string is only integer chars and possible decimal point
-float stof(const std::string& str) {
+float stof(std::string str) {
     int num = 0;
     int count = 0;
     bool startCounting = false;
@@ -39,7 +39,7 @@ float stof(const std::string& str) {
     return (float)num / (float)pow(10, count);
 }
 
-int strsum(const std::string& str) {
+int strsum(std::string str) {
     int sum = 0;
     for(int i = 0; i < str.length(); i++) {
         sum += (int)str[i];
@@ -48,7 +48,7 @@ int strsum(const std::string& str) {
 }
 
 // compare strings to find the one that is lesser lexicographically
-int strcmp(const std::string& str1, const std::string& str2) {
+int strcmp(std::string str1, std::string str2) {
     // get the shorter string length
     int end;
     if(str1.length() >= str2.length()) {

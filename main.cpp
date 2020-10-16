@@ -4,7 +4,7 @@
 #include "utils.h"
 
 // hash function for storing app info
-int hash(const std::string& key, int k) {
+int hash(std::string key, int k) {
     int sum = strsum(key);
     while(sum >= k) {
         sum -= k;
@@ -15,10 +15,8 @@ int hash(const std::string& key, int k) {
 // initializes values for an AppInfo and also sets a given string to this app's category
 void initAppInfo(AppInfo *app) {
     std::string input;
-    // get category
     getline(std::cin, input);
     app->category = std::string(input);
-    // get other info
     // app name
     getline(std::cin, input);
     app->name = std::string(input);
@@ -36,12 +34,15 @@ void initAppInfo(AppInfo *app) {
     app->price = stof(input);
 }
 
+// read each app into a tree node and add it to the search tree and hash table
 void popApps(Category *categories ,HashTableEntry **table, int appCount, int m) {
     // read each app and add to the categories and hash table
     for(int i = 0; i < appCount; i++) {
         // create app's node for search tree
         Tree *appTree = new Tree;
         initAppInfo(&appTree->record);  // read in next app info
+        appTree->left = NULL;
+        appTree->right = NULL;
 
         // find the proper category to store node
         int s = 0;
@@ -54,7 +55,7 @@ void popApps(Category *categories ,HashTableEntry **table, int appCount, int m) 
             // navigate tree
             Tree *curr = categories[s].root;
             while(true) { // breaks when node is added
-                if(strcmp(curr->record.name, appTree->record.name) == 1) {
+                if(strcmp(appTree->record.name, curr->record.name) == 1) {
                     // app name was greater; right tree
                     if(curr->right == NULL) {
                         // add node
@@ -94,6 +95,22 @@ void popApps(Category *categories ,HashTableEntry **table, int appCount, int m) 
     }
 }
 
+// used to display search tree info
+void showTree(Tree curr, int l, int r) {
+    if(curr.left == NULL && curr.right == NULL) {
+        std::cout << "Leaf: ";
+    }
+    std::cout << "(" << l << "," << r << ")" << curr.record.name << std::endl;
+    if(curr.left != NULL) {
+        std::cout << "Left: ";
+        showTree(*curr.left, l+1, r);
+    }
+    if(curr.right != NULL) {
+        std::cout << "Right: ";
+        showTree(*curr.right, l, r+1);
+    }
+}
+
 int main() {
     std::string input;
 
@@ -107,16 +124,19 @@ int main() {
     for(int i = 0; i < catsSize; i++) {
         getline(std::cin, input);
         categories[i].name = std::string(input);
+        categories[i].root = NULL;
     }
 
     // create app hash table size
     getline(std::cin, input);
     int appCount = stoi(input);
     int hashSize = nextPrime(appCount * 2);
-    std::cout << "Prime: " << hashSize << std::endl;
 
     // create hash table
     HashTableEntry *hashTable[hashSize];
+    for(int i = 0; i < hashSize; i++) {
+        hashTable[i] = NULL;
+    }
 
     // populate app store
     popApps(categories, hashTable, appCount, hashSize);
