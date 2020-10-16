@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <typeinfo>
 #include "structs.h"
 #include "utils.h"
 
@@ -171,14 +172,21 @@ void findApp(HashTableEntry **table, std::string name, int k) {
     std::cout << "Application " << name << "not found.";
 }
 
+void deleteMem(HashTableEntry *entry) {
+    if(entry->next != NULL) {
+        deleteMem(entry->next);
+    }
+    delete entry->appNode;
+    delete entry;
+}
+
 int main() {
     std::string input;
 
     // create categories
     getline(std::cin, input);
     int catsSize = (int)stoi(input, 1);
-    Category *categories;
-    categories = new Category[catsSize];
+    Category *categories = new Category[catsSize];
 
     // set category names
     for(int i = 0; i < catsSize; i++) {
@@ -193,7 +201,7 @@ int main() {
     int hashSize = nextPrime(appCount * 2);
 
     // create hash table
-    HashTableEntry *hashTable[hashSize];
+    HashTableEntry **hashTable = new HashTableEntry*[hashSize];
     for(int i = 0; i < hashSize; i++) {
         hashTable[i] = NULL;
     }
@@ -225,9 +233,17 @@ int main() {
         if(i + 1 != queries) {
             std::cout << std::endl << std::endl;
         }
-
-        // report is unimplemented
     }
+    // report is unimplemented
+
+    // deallocate memory
+    for(int i = 0; i < hashSize; i++) {
+        if(hashTable[i] != NULL) {
+            deleteMem(hashTable[i]);
+        }
+    }
+    delete [] categories;
+    delete [] hashTable;
 
     return 0;
 }
