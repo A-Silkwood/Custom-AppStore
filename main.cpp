@@ -111,6 +111,34 @@ void showTree(Tree curr, int l, int r) {
     }
 }
 
+// displays all app info in proper format
+void displayApp(AppInfo app) {
+    std::cout << "Category:\t" << app.category << std::endl;
+    std::cout << "Application Name:\t" << app.name << std::endl;
+    std::cout << "Version:\t" << app.version << std::endl;
+    std::cout << "Size:\t" << app.size << std::endl;
+    std::cout << "Units:\t" << app.units << std::endl;
+    std::cout << "Price:\t$" << app.price << std::endl;
+}
+
+//queries
+
+// finds an app
+void findApp(HashTableEntry **table, std::string name, int k) {
+    HashTableEntry *entry = table[hash(name, k)];
+    while(entry != NULL) {
+        if(name == entry->appName) {
+            // found app
+            std::cout << "Found Application:\t" << name << std::endl;
+            displayApp(entry->appNode->record);
+            return;
+        }
+        entry = entry->next;
+    }
+    // app not found
+    std::cout << "Application " << name << "not found." << std::endl;
+}
+
 int main() {
     std::string input;
 
@@ -140,6 +168,27 @@ int main() {
 
     // populate app store
     popApps(categories, hashTable, appCount, hashSize);
+
+    // start accepting queries and/or updates
+    getline(std::cin, input);
+    int queries = stoi(input);
+    for(int i = 0; i < queries; i++) {
+        getline(std::cin, input);
+        if (input.substr(0, 4) == "find") {
+            if (input.substr(5, 3) == "app") {
+                findApp(hashTable, input.substr(9, std::string::npos), hashSize);
+            } else if (input.substr(5, 8) == "category") {
+
+            } else if (input.substr(5, 5) == "price") {
+
+            }
+        } else if (input.substr(0, 5) == "price") {
+
+        } else if (input.substr(0, 6) == "delete") {
+
+        }
+        std::cout << std::endl;
+    }
 
     return 0;
 }
