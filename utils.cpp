@@ -9,36 +9,6 @@ int pow(int base, int exp) {
     return num;
 }
 
-// string to integer; assumes string is only integer chars
-int stoi(std::string str) {
-    int num = 0;
-    for(int i = 0; i < str.length(); i++) {
-        num *= 10;
-        num += str[i] - '0';
-    }
-
-    return num;
-}
-
-// string to integer; assumes string is only integer chars and possible decimal point
-float stof(std::string str) {
-    int num = 0;
-    int count = 0;
-    bool startCounting = false;
-
-    for(int i = 0; i < str.length(); i++) {
-        if(!startCounting && str[i] == '.') {
-            startCounting = true;
-        } else {
-            num *= 10;
-            num += str[i] - '0';
-            if(startCounting) {count++;}
-        }
-    }
-
-    return (float)num / (float)pow(10, count);
-}
-
 int strsum(std::string str) {
     int sum = 0;
     for(int i = 0; i < str.length(); i++) {

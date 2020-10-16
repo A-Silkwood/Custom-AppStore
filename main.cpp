@@ -5,6 +5,36 @@
 #include "structs.h"
 #include "utils.h"
 
+// string to integer; assumes string is only integer chars
+int stoi(const std::string& str, int i) {
+    int num = 0;
+    for(int i = 0; i < str.length(); i++) {
+        num *= 10;
+        num += str[i] - '0';
+    }
+
+    return num;
+}
+
+// string to integer; assumes string is only integer chars and possible decimal point
+float stof(const std::string& str, float f) {
+    int num = 0;
+    int count = 0;
+    bool startCounting = false;
+
+    for(int i = 0; i < str.length(); i++) {
+        if(!startCounting && str[i] == '.') {
+            startCounting = true;
+        } else {
+            num *= 10;
+            num += str[i] - '0';
+            if(startCounting) {count++;}
+        }
+    }
+
+    return (float)num / (float)pow(10, count);
+}
+
 // hash function for storing app info
 int hash(std::string key, int k) {
     int sum = strsum(key);
@@ -27,13 +57,13 @@ void initAppInfo(AppInfo *app) {
     app->version = std::string(input);
     // app size
     getline(std::cin, input);
-    app->size = stof(input);
+    app->size = (float)stof(input, 1);
     // app size units
     getline(std::cin, input);
     app->units = std::string(input);
     // app price
     getline(std::cin, input);
-    app->price = stof(input);
+    app->price = (float)stof(input, 1);
 }
 
 // read each app into a tree node and add it to the search tree and hash table
@@ -146,7 +176,7 @@ int main() {
 
     // create categories
     getline(std::cin, input);
-    int catsSize = stoi(input);
+    int catsSize = (int)stoi(input, 1);
     Category *categories;
     categories = new Category[catsSize];
 
@@ -159,7 +189,7 @@ int main() {
 
     // create app hash table size
     getline(std::cin, input);
-    int appCount = stoi(input);
+    int appCount = (int)stoi(input, 1);
     int hashSize = nextPrime(appCount * 2);
 
     // create hash table
@@ -173,7 +203,7 @@ int main() {
 
     // start accepting queries and/or updates
     getline(std::cin, input);
-    int queries = stoi(input);
+    int queries = (int)stoi(input, 1);
     std::cout << std::fixed;
     for(int i = 0; i < queries; i++) {
         // read in query
