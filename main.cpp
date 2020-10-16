@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include "structs.h"
 #include "utils.h"
 
@@ -116,9 +118,9 @@ void displayApp(AppInfo app) {
     std::cout << "\tCategory: " << app.category << std::endl;
     std::cout << "\tApplication Name: " << app.name << std::endl;
     std::cout << "\tVersion: " << app.version << std::endl;
-    std::cout << "\tSize: " << app.size << std::endl;
+    std::cout << std::setprecision(1) << "\tSize: " << app.size << std::endl;
     std::cout << "\tUnits: " << app.units << std::endl;
-    std::cout << "\tPrice: $" << app.price;
+    std::cout << std::setprecision(2) << "\tPrice: $" << app.price;
 }
 
 //queries
@@ -129,7 +131,7 @@ void findApp(HashTableEntry **table, std::string name, int k) {
     while(entry != NULL) {
         if(name == entry->appName) {
             // found app
-            std::cout << "Found Application:\t" << name << std::endl;
+            std::cout << "Found Application: " << name << std::endl;
             displayApp(entry->appNode->record);
             return;
         }
@@ -172,6 +174,7 @@ int main() {
     // start accepting queries and/or updates
     getline(std::cin, input);
     int queries = stoi(input);
+    std::cout << std::fixed;
     for(int i = 0; i < queries; i++) {
         // read in query
         getline(std::cin, input);
