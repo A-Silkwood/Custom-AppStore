@@ -1327,11 +1327,11 @@ AccuWeather
 MB
 0.00
 8
-find app Accuweather
-find app Jubitron the Girl Robot
-find app Chrome
-find app FanDuel: One Day Fantasy Sports Leagues
-find app WatchMTV
-find app Dropbox
-find app Sleep Cycle Alarm Clock
-find app Ultimate Guitar
+find app "Accuweather"
+find app "Jubitron the Girl Robot"
+find app "Chrome"
+find app "FanDuel: One Day Fantasy Sports Leagues"
+find app "WatchMTV"
+find app "Dropbox"
+find app "Sleep Cycle Alarm Clock"
+find app "Ultimate Guitar"
