@@ -1,14 +1,33 @@
 #include <iostream>
 
-// raise base to the power of exponent; assumes positive exponent
-int pow(int base, int exp) {
-    int num = 1;
-    for(int i = 0; i < exp; i++) {
-        num *= base;
+// returns the start of the string up until the first occurrence of the delimiter
+std::string cut(std::string str, char delim, int start, int end) {
+    if(end-start <= 0) {return "";}
+    int ix = -1;
+    int found = 0;
+    int startIx;
+    bool startFound = false;
+    if(start == 0) {startIx = -1; startFound = true;}
+    while((found < end || (end == -1 && !startFound)) && ix < (int)str.length()) {
+        ix++;
+        if(str[ix] == delim) {
+            found++;
+        }
+        if(!startFound && found == start) {
+            startIx = ix;
+            startFound = true;
+        }
     }
-    return num;
+    if((found < end || end == -1) && startFound) {
+        return str.substr(startIx+1);
+    } else if(!startFound) {
+        return "";
+    } else {
+        return str.substr(startIx + 1, ix - startIx - 1);
+    }
 }
 
+// returns the sum of all the characters of a string converted to an integer
 int strsum(std::string str) {
     int sum = 0;
     for(int i = 0; i < str.length(); i++) {
