@@ -94,6 +94,84 @@ void popApps(Category *categories ,HashTableEntry **table, int appCount, int m) 
     }
 }
 
+// output the record of the given app
+void showRecord(AppInfo app) {
+    std::cout << "\tCategory: " << app.category << std::endl;
+    std::cout << "\tApplication Name: " << app.name << std::endl;
+    std::cout << "\tVersion: " << app.version << std::endl;
+    std::cout << "\tSize: " << std::fixed << std::setprecision(1) << app.size << std::endl;
+    std::cout << "\tUnits: " << app.units << std::endl;
+    std::cout << "\tPrice: $" << std::fixed << std::setprecision(2) << app.price << std::endl;
+}
+
+// queries
+
+// finds an app in the hash table; if found it prints out its record
+void findApp(std::string app, HashTableEntry **hashTable, int size) {
+    // find app in table
+    int hashIx = hash(app, size);
+    HashTableEntry *curr = &(*hashTable[hashIx]);
+    // continues through chain until the end or app is found
+    while(curr != NULL) {
+        if(strcmp(curr->appName, app) == 0) {
+            break;
+        }
+        curr = curr->next;
+    }
+
+    if(curr != NULL) {
+        // record was found
+        std::cout << "Found Application: " << app << std::endl;
+        showRecord(curr->appNode->record);  // print record
+    } else {
+        // record not found
+        std::cout << "Application " << app << " not found." << std::endl;
+    }
+}
+
+// finds all apps of a given category and prints the names in order of app name
+void findCategory(std::string category, Category *categories, int size) {
+    int i = 0;
+    while(i < size) {
+        if(strcmp(categories[i].name, category) == 0) {
+            break;
+        }
+        i++;
+    }
+}
+
+// updates
+
+// read in query and call the proper function
+void readCommand(std::string command, Category *categories, HashTableEntry **hashTable, int catSize, int hashSize) {
+    // commands
+    if(strcmp(cut(command, ' ', 0, 1), "find") == 0) {
+        // find commands
+        if(strcmp(cut(command, ' ', 1, 2), "app") == 0) {
+            // find app <app_name>
+            findApp(cut(command, '"', 1, 2), hashTable, hashSize);
+        } else if(strcmp(cut(command, ' ', 1, 2), "category") == 0) {
+            findCategory(cut(command, '"', 1, 2), categories);
+        } else if(strcmp(command, "find price free") == 0) {
+            std::cout << "FIND PRICE FREE: " << command << std::endl;
+        } else {
+            std::cout << "FIND NOTHING: " << command << std::endl;
+        }
+    } else if(strcmp(cut(command, ' ', 0, 1), "range") == 0) {
+        if(strcmp(cut(command, ' ', 2, 3), "price") == 0) {
+            std::cout << "RANGE PRICE: " << command << std::endl;
+        } else if(strcmp(cut(command, ' ', 2, 3), "app") == 0) {
+            std::cout << "RANGE APP: " << command << std::endl;
+        } else {
+            std::cout << "RANGE NOTHING: " << command << std::endl;
+        }
+    } else if(strcmp(cut(command, ' ', 0, 1), "delete") == 0) {
+        std::cout << "DELETE: " << command << std::endl;
+    } else {
+        std::cout << "NOTHING: " << command << std::endl;
+    }
+}
+
 // deallocates a hash table entry and its app node from memory
 void deleteMem(HashTableEntry *entry) {
     if(entry->next != NULL) {
@@ -114,7 +192,6 @@ int main() {
     int catsSize;
     inputStream >> catsSize;
     Category *categories = new Category[catsSize];
-
     // read in and set category names
     for(int i = 0; i < catsSize; i++) {
         getline(std::cin, input);
@@ -140,7 +217,19 @@ int main() {
     // populate app store
     popApps(categories, hashTable, appCount, hashSize);
 
+    // get numbers of queries and updates
+    getline(std::cin, input);
+    inputStream.str(input);
+    inputStream.clear();
+    int queriesCount;
+    inputStream >> queriesCount;
+    // perform all queries and updates
+    for(int i = 0; i < queriesCount; i++) {
+        getline(std::cin, input);
+        readCommand(input, categories, hashTable, catsSize, hashSize);
+    }
 
+    // report
 
     // deallocate memory
     for(int i = 0; i < hashSize; i++) {
