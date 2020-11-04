@@ -1326,7 +1326,7 @@ AccuWeather
 60.3
 MB
 0.00
-8
+14
 find app "Accuweather"
 find app "Jubitron the Girl Robot"
 find app "Chrome"
@@ -1335,3 +1335,9 @@ find app "WatchMTV"
 find app "Dropbox"
 find app "Sleep Cycle Alarm Clock"
 find app "Ultimate Guitar"
+find category "Books"
+find category "Food & Drink"
+find category "kids"
+find category "Kids"
+find category "Kid"
+find category "test"

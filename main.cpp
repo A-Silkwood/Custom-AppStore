@@ -104,6 +104,21 @@ void showRecord(AppInfo app) {
     std::cout << "\tPrice: $" << std::fixed << std::setprecision(2) << app.price << std::endl;
 }
 
+// outputs the names of apps in a given tree in order
+bool showTree(Tree *root, float low, float high) {
+    bool left = false; bool right = false; bool curr = false;
+
+    if(root->left != NULL) {left = showTree(root->left, low, high);} // output left tree first
+    // outputs if low and high are -1 or price of app is within low and high
+    if((low == -1 && high == -1) || (root->record.price >= low && root->record.price <= high)) {
+        std::cout << '\t' << root->record.name << std::endl; // output current root
+        curr = true;
+    }
+    if(root->right != NULL) {right = showTree(root->right, low, high);} // output right tree last
+
+    return left || curr || right; // returns true if any output occurs
+}
+
 // queries
 
 // finds an app in the hash table; if found it prints out its record
@@ -118,7 +133,7 @@ void findApp(std::string app, HashTableEntry **hashTable, int size) {
         }
         curr = curr->next;
     }
-
+    // output
     if(curr != NULL) {
         // record was found
         std::cout << "Found Application: " << app << std::endl;
@@ -138,6 +153,31 @@ void findCategory(std::string category, Category *categories, int size) {
         }
         i++;
     }
+    // output
+    if(i < size) {
+        if(categories[i].root != NULL) {
+            // output all apps in category
+            std::cout << "Category: " << category << std::endl;
+            showTree(categories[i].root, -1, -1);
+        } else {
+            // no apps in category
+            std::cout << "Category " << category << " no apps found." << std::endl;
+        }
+    } else {
+        // category does not exist
+        std::cout << "Category " << category << " not found." << std::endl;
+    }
+}
+
+// finds all free apps
+void findPriceFree(Category *categories, int size) {
+    for(int i = 0; i < size; i++) {
+        std::cout << "Free Applications in Category: " << categories[i].name << std::endl;
+        // output free apps
+        if(categories[i].root == NULL || !showTree(categories[i].root, 0, 0)) {
+            std::cout << "\tNo free application found" << std::endl;
+        }
+    }
 }
 
 // updates
@@ -146,18 +186,19 @@ void findCategory(std::string category, Category *categories, int size) {
 void readCommand(std::string command, Category *categories, HashTableEntry **hashTable, int catSize, int hashSize) {
     // commands
     if(strcmp(cut(command, ' ', 0, 1), "find") == 0) {
-        // find commands
+        // find queries
         if(strcmp(cut(command, ' ', 1, 2), "app") == 0) {
             // find app <app_name>
             findApp(cut(command, '"', 1, 2), hashTable, hashSize);
         } else if(strcmp(cut(command, ' ', 1, 2), "category") == 0) {
-            findCategory(cut(command, '"', 1, 2), categories);
+            // find category <category_name>
+            findCategory(cut(command, '"', 1, 2), categories, catSize);
         } else if(strcmp(command, "find price free") == 0) {
-            std::cout << "FIND PRICE FREE: " << command << std::endl;
-        } else {
-            std::cout << "FIND NOTHING: " << command << std::endl;
+            // find price free
+            findPriceFree(categories, catSize);
         }
     } else if(strcmp(cut(command, ' ', 0, 1), "range") == 0) {
+        // range queries
         if(strcmp(cut(command, ' ', 2, 3), "price") == 0) {
             std::cout << "RANGE PRICE: " << command << std::endl;
         } else if(strcmp(cut(command, ' ', 2, 3), "app") == 0) {
