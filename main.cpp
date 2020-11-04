@@ -141,6 +141,34 @@ bool showTreeStringRange(Tree *root, std::string low, std::string high) {
     return left || curr || right; // returns true if any output occurs
 }
 
+// inserts a binary search tree into another tree
+void insertTree(Tree *insert, Tree *tree) {
+    if(insert != NULL) {
+        insertTree(insert->left, tree);
+        insertTree(insert->right, tree);
+        insert->right = NULL;
+        insert->left =NULL;
+        Tree *curr = tree;
+        while(curr != NULL) {
+            if(strcmp(insert->record.name, tree->record.name) == -1) {
+                if(curr->left != NULL) {
+                    curr = curr->left;
+                } else {
+                    curr->left = insert;
+                    break;
+                }
+            } else {
+                if(curr->right != NULL) {
+                    curr = curr->right;
+                } else {
+                    curr->right = insert;
+                    break;
+                }
+            }
+        }
+    }
+}
+
 // queries
 
 // finds an app in the hash table; if found it prints out its record
@@ -231,6 +259,77 @@ void rangeApp(std::string category, Category *categories, int size, std::string 
 }
 
 // updates
+void deleteApp(std::string category, std::string app, Category *categories, int catSize,
+               HashTableEntry ** hashtable, int hashSize) {
+    // remove node from tree
+    int i = 0;
+    while(i < catSize) {
+        if(strcmp(categories[i].name, category) == 0) {break;}
+        i++;
+    }
+    if(i < catSize && categories[i].root != NULL) {
+        // find node and parent
+        Tree *parent;
+        Tree *curr = categories[i].root;
+        bool rightBranch;
+        while(curr != NULL) {
+            if(strcmp(curr->record.name, app) == 0) {
+                break;
+            } else {
+                parent = curr;
+                if (strcmp(curr->record.name, app) == -1) {
+                    curr = curr->left;
+                    rightBranch = false;
+                } else {
+                    curr = curr->right;
+                    rightBranch = true;
+                }
+            }
+        }
+        if(curr == NULL) {
+            std::cout << "Application " << app << " not found in category " << category;
+            std::cout << "; unable to delete." << std::endl;
+        } else {
+            if(parent == NULL) {
+                if(curr->right == NULL) {
+                    categories[i].root = curr->left;
+                } else {
+                    Tree *left = curr->right->left;
+                    curr->right->left = curr->left;
+                    categories[i].root = curr->right;
+                    insertTree(left, categories[i].root);
+                }
+            } else {
+                if(curr->right == NULL) {
+                    if(rightBranch) {
+                        parent->right = curr->left;
+                    } else {
+                        parent->left = curr->left;
+                    }
+                } else {
+                    Tree *left = curr->right->left;
+                    curr->right->left = curr->left;
+                    if(rightBranch) {
+                        parent->right = curr->right;
+                    } else {
+                        parent->left = curr->right;
+                    }
+                    insertTree(left, categories[i].root);
+                }
+            }
+            delete curr;
+            HashTableEntry *entry = hashtable[hash(app, hashSize)];
+            while(entry != NULL && strcmp(entry->appName, app) != 0) {
+                entry = entry->next;
+            }
+            delete entry;
+        }
+    } else {
+        std::cout << "Application " << app << " not found in category " << category;
+        std::cout << "; unable to delete." << std::endl;
+    }
+}
+
 
 // read in query and call the proper function
 void readCommand(std::string command, Category *categories, HashTableEntry **hashTable, int catSize, int hashSize) {
@@ -269,7 +368,8 @@ void readCommand(std::string command, Category *categories, HashTableEntry **has
             rangeApp(cut(command, '"', 1, 2), categories, catSize, low, high);
         }
     } else if(strcmp(cut(command, ' ', 0, 1), "delete") == 0) {
-        std::cout << "DELETE: " << command << std::endl;
+        deleteApp(cut(command, '"', 1, 2), cut(command, '"', 3, 4),
+                  categories, catSize, hashTable, hashSize);
     }
 }
 
