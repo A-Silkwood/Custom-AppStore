@@ -104,17 +104,39 @@ void showRecord(AppInfo app) {
     std::cout << "\tPrice: $" << std::fixed << std::setprecision(2) << app.price << std::endl;
 }
 
-// outputs the names of apps in a given tree in order
-bool showTree(Tree *root, float low, float high) {
+// outputs all the app names of a given tree in order
+void showTree(Tree *root) {
+    if(root->left != NULL) {showTree(root->left);}  // output left tree first
+    std::cout << '\t' << root->record.name << std::endl; // output this node
+    if(root->right != NULL) {showTree(root->right);} // output right tree last
+}
+
+// outputs the names of apps in a given tree in order that are within the range given
+bool showTreePriceRange(Tree *root, float low, float high) {
     bool left = false; bool right = false; bool curr = false;
 
-    if(root->left != NULL) {left = showTree(root->left, low, high);} // output left tree first
+    if(root->left != NULL) {left = showTreePriceRange(root->left, low, high);} // output left tree first
     // outputs if low and high are -1 or price of app is within low and high
-    if((low == -1 && high == -1) || (root->record.price >= low && root->record.price <= high)) {
+    if(root->record.price >= low && root->record.price <= high) {
         std::cout << '\t' << root->record.name << std::endl; // output current root
         curr = true;
     }
-    if(root->right != NULL) {right = showTree(root->right, low, high);} // output right tree last
+    if(root->right != NULL) {right = showTreePriceRange(root->right, low, high);} // output right tree last
+
+    return left || curr || right; // returns true if any output occurs
+}
+
+// outputs the names of apps in a given tree in order that are within the range given
+bool showTreeStringRange(Tree *root, std::string low, std::string high) {
+    bool left = false; bool right = false; bool curr = false;
+
+    if(root->left != NULL) {left = showTreeStringRange(root->left, low, high);} // output left tree first
+    // outputs if low and high are -1 or price of app is within low and high
+    if(strcmp(root->record.name, low) != -1 && strcmp(root->record.name, high) != 1) {
+        std::cout << '\t' << root->record.name << std::endl; // output current root
+        curr = true;
+    }
+    if(root->right != NULL) {right = showTreeStringRange(root->right, low, high);} // output right tree last
 
     return left || curr || right; // returns true if any output occurs
 }
@@ -148,9 +170,7 @@ void findApp(std::string app, HashTableEntry **hashTable, int size) {
 void findCategory(std::string category, Category *categories, int size) {
     int i = 0;
     while(i < size) {
-        if(strcmp(categories[i].name, category) == 0) {
-            break;
-        }
+        if(strcmp(categories[i].name, category) == 0) {break;}
         i++;
     }
     // output
@@ -158,7 +178,7 @@ void findCategory(std::string category, Category *categories, int size) {
         if(categories[i].root != NULL) {
             // output all apps in category
             std::cout << "Category: " << category << std::endl;
-            showTree(categories[i].root, -1, -1);
+            showTree(categories[i].root);
         } else {
             // no apps in category
             std::cout << "Category " << category << " no apps found." << std::endl;
@@ -174,9 +194,39 @@ void findPriceFree(Category *categories, int size) {
     for(int i = 0; i < size; i++) {
         std::cout << "Free Applications in Category: " << categories[i].name << std::endl;
         // output free apps
-        if(categories[i].root == NULL || !showTree(categories[i].root, 0, 0)) {
+        if(categories[i].root == NULL || !showTreePriceRange(categories[i].root, 0, 0)) {
             std::cout << "\tNo free application found" << std::endl;
         }
+    }
+}
+
+// finds all apps within a price range in a specific category
+void rangePrice(std::string category, Category *categories, int size, float low, float high) {
+    int i = 0;
+    while(i < size) {
+        if(strcmp(categories[i].name, category) == 0) {break;}
+        i++;
+    }
+    std::cout << "Applications in Price Range (" << low << "," << high << ") in Category: " << category << std::endl;
+    // output apps in price range
+    if(categories[i].root == NULL || !showTreePriceRange(categories[i].root, low, high)) {
+        std::cout << "\tNo applications found in " << category;
+        std::cout << " for the given range (" << low << "," << high << ")" << std::endl;
+    }
+}
+
+// finds all apps within a alphabet range in a specific category
+void rangeApp(std::string category, Category *categories, int size, std::string low, std::string high) {
+    int i = 0;
+    while(i < size) {
+        if(strcmp(categories[i].name, category) == 0) {break;}
+        i++;
+    }
+    std::cout << "Applications in Range (" << low << "," << high << ") in Category: " << category << std::endl;
+    // output apps in price range
+    if(categories[i].root == NULL || !showTreeStringRange(categories[i].root, low, high)) {
+        std::cout << "\tNo applications found in " << category;
+        std::cout << " for the given range (" << low << "," << high << ")" << std::endl;
     }
 }
 
@@ -200,16 +250,26 @@ void readCommand(std::string command, Category *categories, HashTableEntry **has
     } else if(strcmp(cut(command, ' ', 0, 1), "range") == 0) {
         // range queries
         if(strcmp(cut(command, ' ', 2, 3), "price") == 0) {
-            std::cout << "RANGE PRICE: " << command << std::endl;
+            // range <category_name> price <low> <high>
+            std::string temp = cut(command, '"', 2, 3);
+            std::string low = cut(temp, ' ', 3, 4);
+            std::string high = cut(temp, ' ', 4, 5);
+            std::stringstream inputStream;
+            float lowF, highF;
+            inputStream.str(low);
+            inputStream >> lowF;
+            inputStream.str(high);
+            inputStream.clear();
+            inputStream >> highF;
+            rangePrice(cut(command, '"', 1, 2), categories, catSize, lowF, highF);
         } else if(strcmp(cut(command, ' ', 2, 3), "app") == 0) {
-            std::cout << "RANGE APP: " << command << std::endl;
-        } else {
-            std::cout << "RANGE NOTHING: " << command << std::endl;
+            // range <category_name> app <low> <high>
+            std::string low = cut(command, '"', 3, 4);
+            std::string high = cut(command, '"', 4, 5);
+            rangeApp(cut(command, '"', 1, 2), categories, catSize, low, high);
         }
     } else if(strcmp(cut(command, ' ', 0, 1), "delete") == 0) {
         std::cout << "DELETE: " << command << std::endl;
-    } else {
-        std::cout << "NOTHING: " << command << std::endl;
     }
 }
 
